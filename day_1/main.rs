@@ -13,13 +13,24 @@ fn sum() -> i32 {
 
 fn main () {
     println!("Hello, world!");
-    let mut max:i32 = 0;
+    let mut max_1:i32 = 0;
+    let mut max_2:i32 = 0;
+    let mut max_3:i32 = 0;
     let mut cur:i32 = 0;
 
     loop {
         cur = sum();
         if cur == 0 { break; }
-        if cur > max { max = cur; }
+        if cur > max_1 {
+            max_3 = max_2;
+            max_2 = max_1;
+            max_1 = cur;
+        } else if cur > max_2 {
+            max_3 = max_2;
+            max_2 = cur;
+        } else if cur > max_3 {
+            max_3 = cur;
+        }
     }
-    println!("{}", max);
+    println!("{}", max_1 + max_2 + max_3);
 }
