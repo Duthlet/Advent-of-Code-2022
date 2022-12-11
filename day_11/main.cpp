@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <climits>
 
 struct monkey;
 
@@ -105,9 +106,11 @@ long long monkey::op (long long x) {
 void monkey::turn() {
     for (auto x : items) {
         ++count;
-        int y = (op(x)/3) % modulus;
+        if (x >= (long long)INT_MAX) {
+            std::cout << "!!!WARNING!!!\n";
+        }
+        long long y = (op(x)) % modulus;
         Monkey[throw_to[!!(y%div_by)]]->items.push_back(y);
-        //std::cout << "throw " << y << " to monkey " << throw_to[!!(y%div_by)] << "\n";
     }
     items.clear();
 }
@@ -124,22 +127,19 @@ void init() {
 void round() {
     for (auto m : Monkey) {
         for (auto &x : m->items)
-        std::cout << x << ",";
         m->turn();
-        std::cout << "\n";
     }
-    std::cout << "\n------------\n\n";
 }
 
 int main () {
     init();
-    std::cout << "modulus = " << modulus << "\n";
-    for (int i = 0; i < 20; ++i) round();
+    for (int i = 0; i < 10000; ++i) {
+        round();
+    }
 
-    int m1 = 0, m2 = 0;
+    long long m1 = 0, m2 = 0;
 
     for (auto m : Monkey) {
-        //std::cout << m->count << "\n";
         if (m->count > m1) {
             m2 = m1;
             m1 = m->count;
