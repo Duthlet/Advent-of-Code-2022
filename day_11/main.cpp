@@ -6,7 +6,7 @@
 struct monkey;
 
 bool done = false;
-long long modulus = 1;
+long long modulus = 243;
 std::vector<monkey*> Monkey;
 
 struct monkey {
@@ -109,7 +109,7 @@ void monkey::turn() {
         if (x >= (long long)INT_MAX) {
             std::cout << "!!!WARNING!!!\n";
         }
-        long long y = (op(x)) % modulus;
+        long long y = (op(x)/3) % modulus;
         Monkey[throw_to[!!(y%div_by)]]->items.push_back(y);
     }
     items.clear();
@@ -133,7 +133,7 @@ void round() {
 
 int main () {
     init();
-    for (int i = 0; i < 10000; ++i) {
+    for (int i = 0; i < 20; ++i) {
         round();
     }
 
