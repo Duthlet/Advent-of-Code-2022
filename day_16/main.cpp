@@ -17,7 +17,6 @@ struct valve {
 };
 
 #include "input.inc"
-//#include "test_input.inc"
 
 void print_valve (valve &v) {
     std::cout << "Valve " << v.name << ": flowrate = " << v.flowrate
@@ -62,35 +61,58 @@ std::vector<valve>::iterator find_valve (std::vector<valve> &vec, const std::str
     return cur_it;
 }
 
-int dsf(
+int dfs(
     int remaining_moves,
     int flowrate,
     int released_pressure,
     const std::string &current_valve,
-    std::vector<std::string> open_valves)
+    std::vector<std::string> closed_valves,
+    bool elephant = false)
 {
-    //std::cout << remaining_moves << "\n";
     auto cur_it = find_valve(input, current_valve);
     if (cur_it == input.end()) {
         std::cout << "valve " << current_valve << " not found!\n";
         return 0;
     }
-    open_valves.push_back(current_valve);
-    int max_pressure = released_pressure + flowrate + (flowrate + cur_it->flowrate) * remaining_moves;
-    for (auto it : cur_it->tunnels) {
-        if (std::find(open_valves.begin(), open_valves.end(), it.first) != open_valves.end()) continue;
-        if (it.second < remaining_moves-1) {
-            int candidate = dsf(
-                remaining_moves - it.second - 1,
-                flowrate + cur_it->flowrate,
-                released_pressure + flowrate + (flowrate + cur_it->flowrate) * it.second,
-                it.first,
-                open_valves);
+    
+    auto cv_it = std::find(closed_valves.begin(), closed_valves.end(), current_valve);
+    if (cv_it == closed_valves.end()) {
+        std::cout << "valve " << current_valve << " not closed!\n";
+        return 0;
+    }
+    closed_valves.erase(cv_it);
 
-            if (candidate > max_pressure) max_pressure = candidate;
+    auto retval = released_pressure + flowrate + (flowrate + cur_it->flowrate) * remaining_moves;
+    
+    if (!elephant) {
+        closed_valves.push_back("AA");
+        retval += dfs (26,
+                0,
+                0,
+                "AA",
+                closed_valves,
+                true
+                );
+        closed_valves.pop_back();
+    }
+
+    for (auto &name : closed_valves) {
+        auto value = cur_it->tunnels[name];
+        if (value < remaining_moves-1) {
+            auto candidate = dfs(
+                remaining_moves - value - 1,
+                flowrate + cur_it->flowrate,
+                released_pressure + flowrate + (flowrate + cur_it->flowrate) * value,
+                name,
+                closed_valves,
+                elephant);
+
+            if (candidate > retval) {
+                retval = candidate;
+            }
         }
     }
-    return max_pressure;
+    return retval;
 }
 
 std::map<std::string, int>::iterator get_lowest(std::map<std::string, int> &t, std::vector<std::string> &except) {
@@ -114,7 +136,7 @@ void update (std::vector<valve> &valve_vector, std::vector<valve>::iterator upda
             t[v.name] = 1000;
         }
     }
-    // update eacj tunnel
+    // update each tunnel
     while (updated.size() < t.size()) {
         auto lowest_it = get_lowest(t, updated);
         updated.push_back(lowest_it->first);
@@ -143,5 +165,11 @@ int main () {
         print_valve(v);
     }
 
-    std::cout << dsf(30, 0, 0, "AA", std::vector<std::string>{}) << "\n";
+    std::vector<std::string> closed_valves {};
+    for (auto &v : input) {
+        closed_valves.push_back(v.name);
+    }
+
+    auto result =dfs(26, 0, 0, "AA", closed_valves);
+    std::cout << result << "\n";
 }
